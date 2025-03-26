@@ -6,7 +6,8 @@ import {
     FaClock,
     FaStar,
     FaArrowLeft,
-    FaEnvelope
+    FaEnvelope,
+    FaBell // Added Bell icon
 } from 'react-icons/fa';
 import { BiCameraMovie } from 'react-icons/bi';
 import { IoMdMenu } from 'react-icons/io';
@@ -48,8 +49,39 @@ const Header = () => {
         useState(false);
     const [resetEmail, setResetEmail] = useState('');
     const [isResetEmailSent, setIsResetEmailSent] = useState(false);
+    // New states for notifications
+    const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] =
+        useState(false);
+    const [notificationCount, setNotificationCount] = useState(3); // Example count
+
     const searchInputRef = useRef(null);
     const dropdownRef = useRef(null);
+    const notificationDropdownRef = useRef(null);
+
+    // Sample notification data
+    const notifications = [
+        {
+            id: 1,
+            type: 'new_movie',
+            title: 'Phim mới: Biệt Đội Siêu Anh Hùng',
+            time: '2 giờ trước',
+            read: false
+        },
+        {
+            id: 2,
+            type: 'promotion',
+            title: 'Ưu đãi: Mua 1 tặng 1 vào thứ 4',
+            time: '1 ngày trước',
+            read: false
+        },
+        {
+            id: 3,
+            type: 'system',
+            title: 'Bảo trì hệ thống hoàn tất',
+            time: '3 ngày trước',
+            read: true
+        }
+    ];
 
     // Sample movie data for the search dropdown
     const movies = [
@@ -140,6 +172,14 @@ const Header = () => {
             arrow: true,
             animation: 'scale'
         });
+
+        // Add tooltip for notification button
+        tippy('#notificationButton', {
+            content: 'Thông báo',
+            placement: 'bottom',
+            arrow: true,
+            animation: 'scale'
+        });
     }, []);
 
     // Add click outside listener to close dropdown
@@ -152,6 +192,14 @@ const Header = () => {
                 !searchInputRef.current.contains(event.target)
             ) {
                 setIsSearchDropdownOpen(false);
+            }
+
+            // Close notification dropdown when clicking outside
+            if (
+                notificationDropdownRef.current &&
+                !notificationDropdownRef.current.contains(event.target)
+            ) {
+                setIsNotificationDropdownOpen(false);
             }
         }
 
@@ -169,6 +217,16 @@ const Header = () => {
     // Handle search input focus
     const handleSearchFocus = () => {
         setIsSearchDropdownOpen(true);
+    };
+
+    // Toggle notification dropdown
+    const toggleNotificationDropdown = () => {
+        setIsNotificationDropdownOpen(!isNotificationDropdownOpen);
+    };
+
+    // Mark all notifications as read
+    const markAllAsRead = () => {
+        setNotificationCount(0);
     };
 
     // Handle movie selection from dropdown
@@ -343,6 +401,104 @@ const Header = () => {
                             )}
                         </div>
 
+                        {/* Notification Bell - NEW */}
+                        <div className="relative">
+                            <button
+                                id="notificationButton"
+                                onClick={toggleNotificationDropdown}
+                                className="text-white hover:text-yellow-300 transition-colors duration-300 p-2 relative"
+                            >
+                                <FaBell className="text-xl" />
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Notification Dropdown */}
+                            {isNotificationDropdownOpen && (
+                                <div
+                                    ref={notificationDropdownRef}
+                                    className="absolute right-0 mt-2 w-80 bg-gray-800 shadow-lg rounded-lg z-50 overflow-hidden"
+                                >
+                                    <div className="px-4 py-3 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+                                        <h3 className="font-semibold text-white">
+                                            Thông Báo
+                                        </h3>
+                                        {notificationCount > 0 && (
+                                            <button
+                                                onClick={markAllAsRead}
+                                                className="text-xs text-yellow-400 hover:text-yellow-300"
+                                            >
+                                                Đánh dấu tất cả đã đọc
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                                        {notifications.length > 0 ? (
+                                            <ul>
+                                                {notifications.map(
+                                                    (notification) => (
+                                                        <li
+                                                            key={
+                                                                notification.id
+                                                            }
+                                                            className={`px-4 py-3 border-b border-gray-700 hover:bg-gray-700 transition-colors ${!notification.read ? 'bg-gray-700 bg-opacity-50' : ''}`}
+                                                        >
+                                                            <div className="flex items-start">
+                                                                <div className="flex-shrink-0 mr-3">
+                                                                    {notification.type ===
+                                                                        'new_movie' && (
+                                                                        <BiCameraMovie className="text-blue-400 text-xl" />
+                                                                    )}
+                                                                    {notification.type ===
+                                                                        'promotion' && (
+                                                                        <FaStar className="text-yellow-400 text-xl" />
+                                                                    )}
+                                                                    {notification.type ===
+                                                                        'system' && (
+                                                                        <FaClock className="text-gray-400 text-xl" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <p className="text-white text-sm font-medium">
+                                                                        {
+                                                                            notification.title
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-gray-400 text-xs mt-1">
+                                                                        {
+                                                                            notification.time
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                                {!notification.read && (
+                                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                )}
+                                                            </div>
+                                                        </li>
+                                                    )
+                                                )}
+                                            </ul>
+                                        ) : (
+                                            <div className="py-8 text-center text-gray-400">
+                                                <p>Không có thông báo mới</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="px-4 py-2 bg-gray-900 border-t border-gray-700 text-center">
+                                        <Link
+                                            to="/notifications"
+                                            className="text-yellow-400 hover:text-yellow-300 text-sm font-medium"
+                                        >
+                                            Xem tất cả thông báo
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Login Button */}
                         <button
                             id="loginButton"
@@ -459,16 +615,31 @@ const Header = () => {
                         )}
                     </div>
 
-                    <button
-                        onClick={() => {
-                            setIsModalOpen(true);
-                            setIsMenuOpen(false);
-                        }}
-                        className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-semibold px-4 py-2 rounded-full w-full flex items-center justify-center"
-                    >
-                        <FaUser className="mr-2" />
-                        Đăng nhập
-                    </button>
+                    {/* Mobile Buttons - Modified to include notifications */}
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={toggleNotificationDropdown}
+                            className="flex-1 bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center justify-center relative"
+                        >
+                            <FaBell className="mr-2" />
+                            Thông báo
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {notificationCount}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsModalOpen(true);
+                                setIsMenuOpen(false);
+                            }}
+                            className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center justify-center"
+                        >
+                            <FaUser className="mr-2" />
+                            Đăng nhập
+                        </button>
+                    </div>
                 </div>
             </div>
 
