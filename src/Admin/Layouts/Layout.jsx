@@ -5,7 +5,7 @@ import Header from '../Header';
 import Sidebar from '../Sidebar';
 
 const Layout = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Set sidebar closed by default on mobile devices
     useEffect(() => {
