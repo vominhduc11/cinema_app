@@ -1,4 +1,6 @@
+// Updated Sidebar.jsx - Key changes to fix props and toggle functionality
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     FaTachometerAlt,
     FaUsers,
@@ -26,6 +28,8 @@ import {
 } from 'react-icons/fa';
 
 const Sidebar = ({ collapsed, toggleSidebar }) => {
+    const navigate = useNavigate();
+
     // Expanded menu items state
     const [expanded, setExpanded] = useState({
         users: false,
@@ -49,12 +53,18 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
     };
 
     // Handle click on menu item
-    const handleMenuItemClick = (id, hasSubmenu) => {
+    const handleMenuItemClick = (id, hasSubmenu, path) => {
         if (hasSubmenu) {
             toggleExpand(id);
         } else {
             setActiveItem(id);
             setActiveSubItem(null);
+
+            // Navigate if path provided
+            if (path) {
+                navigate(path);
+            }
+
             // Close sidebar on mobile when item clicked
             if (window.innerWidth < 768) {
                 toggleSidebar();
@@ -63,9 +73,15 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
     };
 
     // Handle click on submenu item
-    const handleSubmenuItemClick = (parentId, id) => {
+    const handleSubmenuItemClick = (parentId, id, path) => {
         setActiveItem(parentId);
         setActiveSubItem(id);
+
+        // Navigate to the specific route if provided
+        if (path) {
+            navigate(path);
+        }
+
         // Close sidebar on mobile when item clicked
         if (window.innerWidth < 768) {
             toggleSidebar();
@@ -78,7 +94,8 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
             id: 'dashboard',
             label: 'Dashboard',
             icon: <FaTachometerAlt />,
-            hasSubmenu: false
+            hasSubmenu: false,
+            path: '/dashboard'
         },
         {
             id: 'users',
@@ -89,12 +106,14 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 {
                     id: 'all-users',
                     label: 'All Users',
-                    icon: <FaUsers size="0.85em" />
+                    icon: <FaUsers size="0.85em" />,
+                    path: '/allusers'
                 },
                 {
                     id: 'roles',
                     label: 'Roles & Permissions',
-                    icon: <FaUserShield size="0.85em" />
+                    icon: <FaUserShield size="0.85em" />,
+                    path: '/roles'
                 }
             ]
         },
@@ -107,12 +126,14 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 {
                     id: 'all-movies',
                     label: 'All Movies',
-                    icon: <FaList size="0.85em" />
+                    icon: <FaList size="0.85em" />,
+                    path: '/movies'
                 },
                 {
                     id: 'schedules',
                     label: 'Movie Schedules',
-                    icon: <FaCalendarAlt size="0.85em" />
+                    icon: <FaCalendarAlt size="0.85em" />,
+                    path: '/schedules'
                 }
             ]
         },
@@ -125,17 +146,20 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 {
                     id: 'all-theaters',
                     label: 'All Theaters',
-                    icon: <FaRegBuilding size="0.85em" />
+                    icon: <FaRegBuilding size="0.85em" />,
+                    path: '/theaters'
                 },
                 {
                     id: 'locations',
                     label: 'Theater Locations',
-                    icon: <FaMapMarkerAlt size="0.85em" />
+                    icon: <FaMapMarkerAlt size="0.85em" />,
+                    path: '/locations'
                 },
                 {
                     id: 'movies-list',
                     label: 'Movies by Theater',
-                    icon: <FaListUl size="0.85em" />
+                    icon: <FaListUl size="0.85em" />,
+                    path: '/movies-by-theater'
                 }
             ]
         },
@@ -148,35 +172,14 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 {
                     id: 'all-rooms',
                     label: 'All Rooms',
-                    icon: <FaDoorOpen size="0.85em" />
+                    icon: <FaDoorOpen size="0.85em" />,
+                    path: '/rooms'
                 },
                 {
                     id: 'showtimes',
                     label: 'Showtimes',
-                    icon: <FaClock size="0.85em" />
-                }
-            ]
-        },
-        {
-            id: 'sales',
-            label: 'Sales Dashboard',
-            icon: <FaChartLine />,
-            hasSubmenu: true,
-            submenu: [
-                {
-                    id: 'ticket-sales',
-                    label: 'Ticket Sales',
-                    icon: <FaTicketAlt size="0.85em" />
-                },
-                {
-                    id: 'revenue-charts',
-                    label: 'Revenue Charts',
-                    icon: <FaChartLine size="0.85em" />
-                },
-                {
-                    id: 'sales-reports',
-                    label: 'Sales Reports',
-                    icon: <FaDollarSign size="0.85em" />
+                    icon: <FaClock size="0.85em" />,
+                    path: '/showtimes'
                 }
             ]
         },
@@ -189,17 +192,20 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                 {
                     id: 'all-promotions',
                     label: 'All Promotions',
-                    icon: <FaGift size="0.85em" />
+                    icon: <FaGift size="0.85em" />,
+                    path: '/promotions'
                 },
                 {
                     id: 'discounts',
                     label: 'Discounts',
-                    icon: <FaPercentage size="0.85em" />
+                    icon: <FaPercentage size="0.85em" />,
+                    path: '/discounts'
                 },
                 {
                     id: 'notifications',
                     label: 'Send Notifications',
-                    icon: <FaBullhorn size="0.85em" />
+                    icon: <FaBullhorn size="0.85em" />,
+                    path: '/notifications'
                 }
             ]
         }
@@ -220,7 +226,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                     : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             } ${collapsed ? 'justify-center' : ''}`}
                     onClick={() =>
-                        handleMenuItemClick(item.id, item.hasSubmenu)
+                        handleMenuItemClick(item.id, item.hasSubmenu, item.path)
                     }
                 >
                     <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
@@ -263,7 +269,11 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
                           : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                   }`}
                                 onClick={() =>
-                                    handleSubmenuItemClick(item.id, subItem.id)
+                                    handleSubmenuItemClick(
+                                        item.id,
+                                        subItem.id,
+                                        subItem.path
+                                    )
                                 }
                             >
                                 <span className="mr-2 text-xs">
@@ -280,8 +290,8 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
 
     return (
         <div
-            className={`bg-gray-900 text-white h-screen transition-all duration-300 ease-in-out 
-        ${collapsed ? 'w-16' : 'w-64'} fixed left-0 overflow-y-auto overflow-x-hidden z-30`}
+            className={`bg-gray-900 text-white h-full transition-all duration-300 ease-in-out 
+        ${collapsed ? 'w-16' : 'w-64'} overflow-y-auto overflow-x-hidden z-30`}
         >
             {/* Logo & Brand */}
             <div
@@ -303,7 +313,7 @@ const Sidebar = ({ collapsed, toggleSidebar }) => {
             <nav className="mt-5 px-1">{menuItems.map(renderMenuItem)}</nav>
 
             {/* User Section */}
-            <div className="absolute bottom-0 w-full border-t border-gray-800">
+            <div className="mt-auto border-t border-gray-800 pt-2">
                 <div
                     className={`flex items-center px-4 py-3 hover:bg-gray-800 cursor-pointer ${
                         collapsed ? 'justify-center' : ''
