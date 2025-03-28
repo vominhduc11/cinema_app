@@ -1,236 +1,352 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import {
-    FaTh,
-    FaFilm,
+    FaTachometerAlt,
     FaUsers,
-    FaTicketAlt,
-    FaChartBar,
-    FaCalendarAlt,
-    FaMoneyBillWave,
-    FaCog,
-    FaComments,
-    FaImage,
+    FaFilm,
     FaTheaterMasks,
-    FaStar,
-    FaTags
+    FaClock,
+    FaChartLine,
+    FaGift,
+    FaUserCog,
+    FaAngleDown,
+    FaAngleRight,
+    FaCog,
+    FaSignOutAlt,
+    FaUserShield,
+    FaTicketAlt,
+    FaCalendarAlt,
+    FaRegBuilding,
+    FaDollarSign,
+    FaBullhorn,
+    FaPercentage,
+    FaMapMarkerAlt,
+    FaListUl,
+    FaList,
+    FaDoorOpen
 } from 'react-icons/fa';
-import { BiCameraMovie } from 'react-icons/bi';
 
-const Sidebar = ({ isOpen }) => {
-    const location = useLocation();
+const Sidebar = ({ collapsed, toggleSidebar }) => {
+    // Expanded menu items state
+    const [expanded, setExpanded] = useState({
+        users: false,
+        movies: false,
+        theaters: false,
+        rooms: false,
+        sales: false,
+        promotions: false
+    });
 
+    // Active menu item
+    const [activeItem, setActiveItem] = useState('dashboard');
+    const [activeSubItem, setActiveSubItem] = useState(null);
+
+    // Toggle expand/collapse of menu item
+    const toggleExpand = (key) => {
+        setExpanded({
+            ...expanded,
+            [key]: !expanded[key]
+        });
+    };
+
+    // Handle click on menu item
+    const handleMenuItemClick = (id, hasSubmenu) => {
+        if (hasSubmenu) {
+            toggleExpand(id);
+        } else {
+            setActiveItem(id);
+            setActiveSubItem(null);
+            // Close sidebar on mobile when item clicked
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+    };
+
+    // Handle click on submenu item
+    const handleSubmenuItemClick = (parentId, id) => {
+        setActiveItem(parentId);
+        setActiveSubItem(id);
+        // Close sidebar on mobile when item clicked
+        if (window.innerWidth < 768) {
+            toggleSidebar();
+        }
+    };
+
+    // Menu items data based on requirements
     const menuItems = [
         {
-            title: 'Dashboard',
-            icon: <FaTh />,
-            path: '/admin',
-            exact: true
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: <FaTachometerAlt />,
+            hasSubmenu: false
         },
         {
-            title: 'Quản lý Phim',
-            icon: <FaFilm />,
-            path: '/admin/movies',
-            submenu: [
-                { title: 'Danh sách phim', path: '/admin/movies' },
-                { title: 'Thêm phim mới', path: '/admin/movies/add' },
-                { title: 'Loại phim', path: '/admin/movies/categories' }
-            ]
-        },
-        {
-            title: 'Quản lý Rạp',
-            icon: <FaTheaterMasks />,
-            path: '/admin/theaters',
-            submenu: [
-                { title: 'Danh sách rạp', path: '/admin/theaters' },
-                { title: 'Quản lý phòng chiếu', path: '/admin/theaters/rooms' }
-            ]
-        },
-        {
-            title: 'Lịch Chiếu',
-            icon: <FaCalendarAlt />,
-            path: '/admin/showtimes'
-        },
-        {
-            title: 'Quản lý Vé',
-            icon: <FaTicketAlt />,
-            path: '/admin/tickets',
-            submenu: [
-                { title: 'Danh sách vé', path: '/admin/tickets' },
-                { title: 'Vé đã bán', path: '/admin/tickets/sold' },
-                { title: 'Vé đã hủy', path: '/admin/tickets/canceled' }
-            ]
-        },
-        {
-            title: 'Quản lý Người Dùng',
+            id: 'users',
+            label: 'User Management',
             icon: <FaUsers />,
-            path: '/admin/users',
+            hasSubmenu: true,
             submenu: [
-                { title: 'Danh sách người dùng', path: '/admin/users' },
-                { title: 'Thêm người dùng', path: '/admin/users/add' },
-                { title: 'Phân quyền', path: '/admin/users/roles' }
+                {
+                    id: 'all-users',
+                    label: 'All Users',
+                    icon: <FaUsers size="0.85em" />
+                },
+                {
+                    id: 'roles',
+                    label: 'Roles & Permissions',
+                    icon: <FaUserShield size="0.85em" />
+                }
             ]
         },
         {
-            title: 'Khuyến Mãi',
-            icon: <FaTags />,
-            path: '/admin/promotions'
-        },
-        {
-            title: 'Thanh Toán',
-            icon: <FaMoneyBillWave />,
-            path: '/admin/payments',
+            id: 'movies',
+            label: 'Movies Management',
+            icon: <FaFilm />,
+            hasSubmenu: true,
             submenu: [
-                { title: 'Lịch sử thanh toán', path: '/admin/payments' },
-                { title: 'Cấu hình thanh toán', path: '/admin/payments/config' }
+                {
+                    id: 'all-movies',
+                    label: 'All Movies',
+                    icon: <FaList size="0.85em" />
+                },
+                {
+                    id: 'schedules',
+                    label: 'Movie Schedules',
+                    icon: <FaCalendarAlt size="0.85em" />
+                }
             ]
         },
         {
-            title: 'Báo Cáo & Thống Kê',
-            icon: <FaChartBar />,
-            path: '/admin/reports',
+            id: 'theaters',
+            label: 'Theater Management',
+            icon: <FaTheaterMasks />,
+            hasSubmenu: true,
             submenu: [
-                { title: 'Doanh thu', path: '/admin/reports/revenue' },
-                { title: 'Người dùng', path: '/admin/reports/users' },
-                { title: 'Vé bán', path: '/admin/reports/tickets' },
-                { title: 'Phim phổ biến', path: '/admin/reports/popular' }
+                {
+                    id: 'all-theaters',
+                    label: 'All Theaters',
+                    icon: <FaRegBuilding size="0.85em" />
+                },
+                {
+                    id: 'locations',
+                    label: 'Theater Locations',
+                    icon: <FaMapMarkerAlt size="0.85em" />
+                },
+                {
+                    id: 'movies-list',
+                    label: 'Movies by Theater',
+                    icon: <FaListUl size="0.85em" />
+                }
             ]
         },
         {
-            title: 'Media & Files',
-            icon: <FaImage />,
-            path: '/admin/media'
+            id: 'rooms',
+            label: 'Room Management',
+            icon: <FaDoorOpen />,
+            hasSubmenu: true,
+            submenu: [
+                {
+                    id: 'all-rooms',
+                    label: 'All Rooms',
+                    icon: <FaDoorOpen size="0.85em" />
+                },
+                {
+                    id: 'showtimes',
+                    label: 'Showtimes',
+                    icon: <FaClock size="0.85em" />
+                }
+            ]
         },
         {
-            title: 'Đánh Giá & Bình Luận',
-            icon: <FaStar />,
-            path: '/admin/reviews'
+            id: 'sales',
+            label: 'Sales Dashboard',
+            icon: <FaChartLine />,
+            hasSubmenu: true,
+            submenu: [
+                {
+                    id: 'ticket-sales',
+                    label: 'Ticket Sales',
+                    icon: <FaTicketAlt size="0.85em" />
+                },
+                {
+                    id: 'revenue-charts',
+                    label: 'Revenue Charts',
+                    icon: <FaChartLine size="0.85em" />
+                },
+                {
+                    id: 'sales-reports',
+                    label: 'Sales Reports',
+                    icon: <FaDollarSign size="0.85em" />
+                }
+            ]
         },
         {
-            title: 'Tin Nhắn',
-            icon: <FaComments />,
-            path: '/admin/messages'
-        },
-        {
-            title: 'Cài Đặt Hệ Thống',
-            icon: <FaCog />,
-            path: '/admin/settings'
+            id: 'promotions',
+            label: 'Promotions',
+            icon: <FaGift />,
+            hasSubmenu: true,
+            submenu: [
+                {
+                    id: 'all-promotions',
+                    label: 'All Promotions',
+                    icon: <FaGift size="0.85em" />
+                },
+                {
+                    id: 'discounts',
+                    label: 'Discounts',
+                    icon: <FaPercentage size="0.85em" />
+                },
+                {
+                    id: 'notifications',
+                    label: 'Send Notifications',
+                    icon: <FaBullhorn size="0.85em" />
+                }
+            ]
         }
     ];
 
-    // Check if a menu item should be considered active
-    const isActive = (path, exact = false) => {
-        if (exact) {
-            return location.pathname === path;
-        }
-        return location.pathname.startsWith(path);
-    };
+    // Render menu item
+    const renderMenuItem = (item) => {
+        const isActive = activeItem === item.id;
+        const isExpanded = expanded[item.id];
 
-    // State for expanded submenu items
-    const [expandedItems, setExpandedItems] = React.useState([]);
+        return (
+            <div key={item.id} className="mb-1">
+                <button
+                    className={`w-full flex items-center px-4 py-3 text-left transition-colors duration-200 
+            ${
+                isActive
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            } ${collapsed ? 'justify-center' : ''}`}
+                    onClick={() =>
+                        handleMenuItemClick(item.id, item.hasSubmenu)
+                    }
+                >
+                    <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
+                        {item.icon}
+                    </span>
 
-    // Toggle submenu expansion
-    const toggleSubmenu = (index) => {
-        if (expandedItems.includes(index)) {
-            setExpandedItems(expandedItems.filter((item) => item !== index));
-        } else {
-            setExpandedItems([...expandedItems, index]);
-        }
+                    {!collapsed && (
+                        <>
+                            <span className="flex-1 text-sm font-medium">
+                                {item.label}
+                            </span>
+                            {item.hasSubmenu && (
+                                <span className="ml-auto transform transition-transform duration-200">
+                                    {isExpanded ? (
+                                        <FaAngleDown />
+                                    ) : (
+                                        <FaAngleRight />
+                                    )}
+                                </span>
+                            )}
+                            {item.badge && (
+                                <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {item.badge}
+                                </span>
+                            )}
+                        </>
+                    )}
+                </button>
+
+                {/* Submenu */}
+                {!collapsed && item.hasSubmenu && isExpanded && (
+                    <div className="bg-gray-800 animate-slideDown">
+                        {item.submenu.map((subItem) => (
+                            <button
+                                key={subItem.id}
+                                className={`w-full flex items-center pl-12 pr-4 py-2 text-left text-sm transition-colors duration-200 
+                  ${
+                      activeSubItem === subItem.id
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                  }`}
+                                onClick={() =>
+                                    handleSubmenuItemClick(item.id, subItem.id)
+                                }
+                            >
+                                <span className="mr-2 text-xs">
+                                    {subItem.icon}
+                                </span>
+                                <span>{subItem.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     return (
         <div
-            className={`bg-gray-900 text-white fixed h-full z-20 transition-all duration-300 ease-in-out ${isOpen ? 'w-64' : 'w-20'} shadow-lg`}
+            className={`bg-gray-900 text-white h-screen transition-all duration-300 ease-in-out 
+        ${collapsed ? 'w-16' : 'w-64'} fixed left-0 overflow-y-auto overflow-x-hidden z-30`}
         >
-            {/* Sidebar logo - shown only when sidebar is collapsed */}
-            {!isOpen && (
-                <div className="h-16 flex items-center justify-center border-b border-gray-800">
-                    <BiCameraMovie className="text-yellow-300 text-3xl" />
+            {/* Logo & Brand */}
+            <div
+                className={`flex items-center h-16 border-b border-gray-800 ${
+                    collapsed ? 'justify-center px-2' : 'px-4'
+                }`}
+            >
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                    <FaTicketAlt className="text-white" />
                 </div>
-            )}
-
-            {/* Scrollable menu */}
-            <div className="overflow-y-auto h-full pb-20">
-                {menuItems.map((item, index) => (
-                    <div key={index}>
-                        {/* Main menu item */}
-                        {item.submenu ? (
-                            // Item with submenu
-                            <div className="relative">
-                                <button
-                                    onClick={() => toggleSubmenu(index)}
-                                    className={`w-full flex items-center px-4 py-3 transition-colors ${
-                                        isActive(item.path)
-                                            ? 'bg-gray-800 text-yellow-300 border-l-4 border-yellow-300'
-                                            : 'hover:bg-gray-800 hover:text-yellow-300'
-                                    }`}
-                                >
-                                    <span
-                                        className={`text-lg ${isOpen ? 'mr-3' : 'mx-auto'}`}
-                                    >
-                                        {item.icon}
-                                    </span>
-                                    {isOpen && (
-                                        <>
-                                            <span className="text-sm">
-                                                {item.title}
-                                            </span>
-                                            <span className="ml-auto text-xs">
-                                                {expandedItems.includes(index)
-                                                    ? '▼'
-                                                    : '▶'}
-                                            </span>
-                                        </>
-                                    )}
-                                </button>
-
-                                {/* Submenu */}
-                                {isOpen && expandedItems.includes(index) && (
-                                    <div className="bg-gray-800 pl-4">
-                                        {item.submenu.map(
-                                            (subItem, subIndex) => (
-                                                <Link
-                                                    key={subIndex}
-                                                    to={subItem.path}
-                                                    className={`block px-4 py-2 text-sm ${
-                                                        location.pathname ===
-                                                        subItem.path
-                                                            ? 'text-yellow-300'
-                                                            : 'text-gray-400 hover:text-yellow-300'
-                                                    }`}
-                                                >
-                                                    • {subItem.title}
-                                                </Link>
-                                            )
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            // Regular item without submenu
-                            <Link
-                                to={item.path}
-                                className={`flex items-center px-4 py-3 transition-colors ${
-                                    isActive(item.path, item.exact)
-                                        ? 'bg-gray-800 text-yellow-300 border-l-4 border-yellow-300'
-                                        : 'hover:bg-gray-800 hover:text-yellow-300'
-                                }`}
-                            >
-                                <span
-                                    className={`text-lg ${isOpen ? 'mr-3' : 'mx-auto'}`}
-                                >
-                                    {item.icon}
-                                </span>
-                                {isOpen && (
-                                    <span className="text-sm">
-                                        {item.title}
-                                    </span>
-                                )}
-                            </Link>
-                        )}
-                    </div>
-                ))}
+                {!collapsed && (
+                    <h1 className="ml-3 font-bold text-white text-lg">
+                        <span className="text-blue-500">Cinema</span> Admin
+                    </h1>
+                )}
             </div>
+
+            {/* Navigation Menu */}
+            <nav className="mt-5 px-1">{menuItems.map(renderMenuItem)}</nav>
+
+            {/* User Section */}
+            <div className="absolute bottom-0 w-full border-t border-gray-800">
+                <div
+                    className={`flex items-center px-4 py-3 hover:bg-gray-800 cursor-pointer ${
+                        collapsed ? 'justify-center' : ''
+                    }`}
+                >
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                        <FaUserCog />
+                    </div>
+
+                    {!collapsed && (
+                        <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-300">
+                                Admin User
+                            </div>
+                            <div className="text-xs text-gray-500">
+                                admin@example.com
+                            </div>
+                        </div>
+                    )}
+
+                    {!collapsed && (
+                        <FaSignOutAlt className="ml-auto text-gray-500 hover:text-white" />
+                    )}
+                </div>
+            </div>
+
+            {/* CSS for animations */}
+            <style jsx>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .animate-slideDown {
+                    animation: slideDown 0.3s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 };
